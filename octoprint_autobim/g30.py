@@ -26,7 +26,7 @@ class G30Handler(AsyncCommand):
 			firmware_name = self._printer.firmware_info['name']
 			if "klipper" in firmware_name.lower():
 				self.pattern = KLIPPER_PATTERN
-				self._logger.info("Updated G30 pattern to Klipper as the firmware name is %s", firmware_name)
+				#self._logger.info("Updated G30 pattern to Klipper as the firmware name is %s", firmware_name)
 			else:
 				self.pattern = MARLIN_PATTERN
 				self._logger.info("Updated G30 pattern to Marlin as the firmware name is %s", firmware_name)
@@ -40,7 +40,10 @@ class G30Handler(AsyncCommand):
 		self._set_running()
 		custom_g30 = filter_commands(self._settings.get(["custom_g30"]))
 		if not custom_g30:
-			self._printer.commands("G30 X%s Y%s" % point)
+			if point is None:
+				self._printer.commands("G30")
+			else:
+				self._printer.commands("G30 X%s Y%s" % point)
 		else:
 			self._ok_is_error = False
 			for command in custom_g30:

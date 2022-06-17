@@ -239,7 +239,7 @@ class AutobimPlugin(
 		next_point_delay = self._settings.get_float(["next_point_delay"])
 
 		# Default reference is Z=0
-		reference = 0
+		reference = 0 + self.klipper_get_z_offset_reference()
 		corner_index = 0
 		correct_corners = 0
 
@@ -268,6 +268,7 @@ class AutobimPlugin(
 					return
 
 				delta = z_current.value - reference
+				self._logger.info("cur = %s, ref = %s, dt = %s", z_current.value, reference, delta)
 				if abs(delta) >= threshold:
 					if multipass:
 						correct_corners = 0
@@ -331,3 +332,11 @@ class AutobimPlugin(
 		elif not result.has_value():
 			self._abort_now("Cannot probe X%s Y%s! Please check settings!" % point)
 		return result
+
+	def klipper_get_z_offset_reference(self):
+			if "klipper" in self._printer.firmware_info['name'].lower():
+				reference = self._probe_point(None)
+				if not reference.has_value():
+					return 0
+				return reference.value
+			return 0
